@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	_ "github.com/lib/pq"
 )
 
@@ -27,8 +28,8 @@ type Product struct {
 
 type User struct {
 	ID       int    `json:"id"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username" validate:"required,max=20"`
+	Password string `json:"password" validate:"required"`
 }
 
 func main() {
@@ -101,9 +102,20 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
+	// Create a new validator instance
+	validate := validator.New()
+
+	// Validate the User struct
+	err := validate.Struct(u)
+	if err != nil {
+		// Validation failed, handle the error
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Validation error: check inserted data"})
+		return
+	}
+
 	// Query the user by username
 	var dbPassword string
-	err := db.QueryRow("SELECT password FROM users WHERE username = $1", u.Username).Scan(&dbPassword)
+	err = db.QueryRow("SELECT password FROM users WHERE username = $1", u.Username).Scan(&dbPassword)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
