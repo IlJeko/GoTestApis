@@ -63,14 +63,13 @@ func main() {
 }
 
 func getProducts(c *gin.Context) {
-	// Extract token from Authorization header
 	authHeader := c.GetHeader("Authorization")
 	if authHeader == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing authorization header"})
 		return
 	}
 
-	// Remove "Bearer " prefix
+	// Remove Bearer prefix
 	tokenString := authHeader[len("Bearer "):]
 
 	// Verify token
@@ -79,7 +78,6 @@ func getProducts(c *gin.Context) {
 		return
 	}
 
-	// Query the DB
 	rows, err := db.Query("SELECT * FROM products")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
@@ -178,6 +176,7 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
+	// Check password
 	if u.Password != dbPassword {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
