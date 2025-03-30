@@ -148,6 +148,8 @@ func Register(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
+
+	c.String(http.StatusCreated, "User created")
 }
 
 func LoginHandler(c *gin.Context) {
